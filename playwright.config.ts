@@ -23,7 +23,7 @@ const config: PlaywrightTestConfig = {
    * We allow one retry to make the tests less prone to time-out issues,
    * but no more (to avoid aggravating ongoing performance crunches).
    */
-  retries: 1,
+  retries: 0,
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. */
@@ -40,8 +40,9 @@ const config: PlaywrightTestConfig = {
   /* Configure projects for major browsers */
   projects: [
     {
-      name: 'chromium',
+      name: 'chrome',
       use: {
+        channel: 'chrome',
         ...devices['Desktop Chrome'],
       },
     },
