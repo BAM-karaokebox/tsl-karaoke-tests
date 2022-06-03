@@ -5,7 +5,7 @@ const BASE_URL = 'https://www.tslkaraoke.com/?options=dtv';
 const playSong = async (page: any ,search:string ,songName :string) => {
     await page.fill('[type="text"]', `${search}`);
     await page.keyboard.press('Enter');
-    
+
     //search a song and launch it
     await page.locator(`div[role="button"]:has-text("${songName}")`).click();
     await page.locator(`text=${songName}${search}Play nextAdd to waiting list >> button >> nth=1`).click();
@@ -63,7 +63,7 @@ test('Start an english speaking song', async ({ page, context }) => {
     }
 });
 
-test('Start an french speaking song', async ({ page, context }) => {
+test('Start a French-speaking song', async ({ page, context }) => {
 
     await playSong(page,'PNL','Au dd')
 
@@ -77,7 +77,7 @@ test('Start an french speaking song', async ({ page, context }) => {
     }
 });
 
-test('Start a song with an emphasis', async ({ page, context }) => {
+test('Start a song with a accentuated characters in its title', async ({ page, context }) => {
 
     await playSong(page,'Images' ,'Les démons de minuit')
 
