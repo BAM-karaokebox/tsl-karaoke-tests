@@ -35,6 +35,6 @@ jobs:
           status: ${{ job.status  }}
           notify_when: 'failure'
           notification_title: '{workflow} has {status_message}'
-          message_format: 'Test {status_message} in BAM-karaokebox/tsl-karaoke-test: <{run_url}|check report>'
+          message_format: 'Test {status_message} in BAM-karaokebox/TSL-karaoke-test: <{run_url}|check report>'
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.WEBHOOK_URL  }}
