@@ -6,6 +6,7 @@ const playSong = async (page: any ,search:string ,songName :string) => {
     await page.fill('[type="text"]', `${search}`);
     await page.keyboard.press('Enter');
     
+    //search a song and launch it
     await page.locator(`div[role="button"]:has-text("${songName}")`).click();
     await page.locator(`text=${songName}${search}Play nextAdd to waiting list >> button >> nth=1`).click();
     await page.locator('[aria-label="play"]').click();
@@ -15,26 +16,28 @@ const playSong = async (page: any ,search:string ,songName :string) => {
 const Playlist = ['Butter', 'Permission To Dance', 'Dynamite']
 const playlistSong = async (page: any ,search:string) => {
 
-  await page.fill('[type="text"]', `${search}`);
-  await page.keyboard.press('Enter');
+    //Search different song and create a playlist
+    await page.fill('[type="text"]', `${search}`);
+    await page.keyboard.press('Enter');
 
-  await page.locator(`div[role="button"]:has-text("${Playlist[0]}")`).click();
-  await page.locator('button:has-text("Add to waiting list")').click();
+    await page.locator(`div[role="button"]:has-text("${Playlist[0]}")`).click();
+    await page.locator('button:has-text("Add to waiting list")').click();
 
-  await page.locator(`div[role="button"]:has-text("${Playlist[1]}")>> nth=0`).click();
-  await page.locator('button:has-text("Add to waiting list")').click();
+    await page.locator(`div[role="button"]:has-text("${Playlist[1]}")>> nth=0`).click();
+    await page.locator('button:has-text("Add to waiting list")').click();
 
-  await page.locator(`div[role="button"]:has-text("${Playlist[2]}") `).click();
-  await page.locator('button:has-text("Add to waiting list")').click();
+    await page.locator(`div[role="button"]:has-text("${Playlist[2]}") `).click();
+    await page.locator('button:has-text("Add to waiting list")').click();
 
-  await page.waitForTimeout(4000)
+    await page.waitForTimeout(4000)
 };
 
-
 test('Research function', async ({ page, context }) => {
+    //search a song
     await page.fill('[type="text"]', 'PNL');
     await page.keyboard.press('Enter');
     await page.waitForTimeout(2000)
+    //count the number of elemetn wich containt this classes
     const song = page.locator('.MuiListItem-container');
     const numberSong = await song.count();
     if(numberSong === 0){
@@ -48,11 +51,13 @@ test('Start an english speaking song', async ({ page, context }) => {
     await page.locator('text=Upside DownDiana RossPlay nextAdd to waiting list >> button >> nth=1').click();
     await page.locator('[aria-label="play"]').click();
     
+    //wait the timer to appear and read it
     await page.waitForSelector('.sc-iJuUWI .sc-bYEvPH');
     const timerMusicBegin = await page.locator('.sc-iJuUWI .sc-bYEvPH').innerText()
     await page.waitForTimeout(10000)
     const currentTimerMusic = await page.locator('.sc-iJuUWI .sc-bYEvPH').innerText()
 
+    
     if (currentTimerMusic === timerMusicBegin){
         throw new Error ("Music doesn't start")
     }
@@ -151,6 +156,7 @@ test('Back button', async ({ page, context }) => {
     const timerMusicBegin = await page.locator('.sc-iJuUWI .sc-bYEvPH').innerText()
     await page.waitForTimeout(8000)
 
+    //click on the back button
     const timer = await page.locator('.sc-iJuUWI .sc-bYEvPH').innerText()
     await page.locator("text=Dynamite | BTS"+timer+"Vocal guide >> button >> nth=0").first().click();
     await page.waitForTimeout(1000)
@@ -166,12 +172,13 @@ test('Next button', async ({ page, context }) => {
 
     await playlistSong(page, 'BTS')
     
+    //launch the first song of the playlist
     await page.locator('.sc-ehSCib .MuiListItem-container div[role="button"]:has-text("Butter")').click();
     await page.locator('text=ButterBTSPlay nextDelete >> button >> nth=1').click();
-
     await page.waitForTimeout(5000)
-    const timer = await page.locator('.sc-iJuUWI .sc-bYEvPH').innerText()
 
+    //click on the back button
+    const timer = await page.locator('.sc-iJuUWI .sc-bYEvPH').innerText()
     await page.locator("text=Butter | BTS"+timer+"Vocal guide >> button >> nth=2").first().click();
 
     const playlistTest = await page.evaluate(() => {
@@ -209,6 +216,7 @@ test('Voice guide disable', async ({ page, context }) => {
     await playSong(page,'BTS', 'Dynamite')
     await page.waitForTimeout(5000)
 
+    //class of the voice guide available
     if(await page.locator('.zJhbY').isVisible()){
         throw new Error ("Voice guide is available but it shouldn't be")
     }
@@ -219,6 +227,7 @@ test('Voice guide available', async ({ page, context }) => {
     await playSong(page,'BTS', 'Butter')
     await page.waitForTimeout(5000)
 
+    //class of the voice guide disable
     if(await page.locator('.cvDhqK').isVisible()){
         throw new Error ("Voice guide isn't available but it should be")
     }
@@ -230,6 +239,7 @@ test('Voice guide activated', async ({ page, context }) => {
     await page.waitForTimeout(5000)
 
     await page.locator('.zJhbY').click()
+    await page.waitForTimeout(10000)
 
     if(await page.locator('.cvDhqK, .zJhbY').isVisible()){
         throw new Error ("Voice guide should be activated but it is not")
@@ -250,6 +260,7 @@ test('Check if voice guide still activated after a song', async ({ page, context
     await page.locator("text=Butter | BTS"+timerNextButter+"Vocal guide >> button >> nth=2").first().click();
     await page.waitForTimeout(6000)
 
+    //class of the voice guide ON
     if(await page.locator('.fpODTi').isVisible()){
         throw new Error ("Voice guide should be activated but it is not")
     }
@@ -332,7 +343,6 @@ test('Voice guide activated and i can interact with button', async ({ page, cont
     }
 });
 
-
 test('Rail test slide', async ({ page, context }) => {
 
     await playSong(page,'BTS', 'Dynamite')
@@ -361,7 +371,6 @@ test('Rail test slide', async ({ page, context }) => {
         throw new Error ("Slider doesn't work")
     }
 });
-
 
 test('Slide to the end of a song and check if the next song start correctly', async ({ page, context }) => {
 
@@ -397,8 +406,8 @@ test('Slide to the end of a song and check if the next song start correctly', as
 });
 
 test.beforeEach(async ({ page }) => {
-    // load homepage before each test
 
+    // load homepage before each test
     await page.goto(BASE_URL);
     for (let i=0; i<2; i++){
         await page.locator('text=2').click()
