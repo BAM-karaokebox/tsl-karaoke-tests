@@ -1,11 +1,13 @@
 import { test, expect } from '@playwright/test';
+const { chromium } = require('playwright');
+
 
 const BASE_URL = 'https://www.tslkaraoke.com/?options=dtv';
 
 const playSong = async (page: any ,search:string ,songName :string) => {
     await page.fill('[type="text"]', `${search}`);
     await page.keyboard.press('Enter');
-
+    
     //search a song and launch it
     await page.locator(`div[role="button"]:has-text("${songName}")`).click();
     await page.locator(`text=${songName}${search}Play nextAdd to waiting list >> button >> nth=1`).click();
@@ -32,6 +34,26 @@ const playlistSong = async (page: any ,search:string) => {
     await page.waitForTimeout(4000)
 };
 
+const checkPagePlayerIsRunning = async (context:any) => {
+    const pagePlayer = context.pages()[1]
+
+    const word = await pagePlayer.evaluate(() => {
+        let word = []
+        const numbrerWord = document.querySelectorAll('.word').length
+        const wordSong = document.querySelectorAll('.word')
+        for (let i=0; i<numbrerWord; i++){
+            word.push(wordSong[i].textContent)
+        }
+        return word
+    })
+    console.log(word)
+
+    if(word.length === 0){
+        throw new Error ("Player is not running")
+    }
+};
+
+
 test('Research function', async ({ page, context }) => {
     //search a song
     await page.fill('[type="text"]', 'PNL');
@@ -46,10 +68,15 @@ test('Research function', async ({ page, context }) => {
 });
 
 test('Start an english speaking song', async ({ page, context }) => {
+
+    const pagePlayer = context.pages()[1]
+    console.log(pagePlayer.url())
+
     await page.locator('img[alt="Bouge\\ ton\\ boule"]').click();
     await page.locator('div[role="button"]:has-text("Upside DownDiana Ross")').click();
     await page.locator('text=Upside DownDiana RossPlay nextAdd to waiting list >> button >> nth=1').click();
     await page.locator('[aria-label="play"]').click();
+    await page.waitForTimeout(5000)
 
     //wait the timer to appear and read it
     await page.waitForSelector('.sc-iJuUWI .sc-bYEvPH');
@@ -57,6 +84,8 @@ test('Start an english speaking song', async ({ page, context }) => {
     await page.waitForTimeout(10000)
     const currentTimerMusic = await page.locator('.sc-iJuUWI .sc-bYEvPH').innerText()
 
+    await pagePlayer.waitForSelector('.sc-kiYtDG')
+    await checkPagePlayerIsRunning(context)
 
     if (currentTimerMusic === timerMusicBegin){
         throw new Error ("Music doesn't start")
@@ -65,12 +94,16 @@ test('Start an english speaking song', async ({ page, context }) => {
 
 test('Start a French-speaking song', async ({ page, context }) => {
 
+    const pagePlayer = context.pages()[1]
     await playSong(page,'PNL','Au dd')
 
     const timerMusicBegin = await page.locator('.sc-iJuUWI .sc-bYEvPH').innerText()
     await page.waitForTimeout(10000)
 
     const currentTimerMusic = await page.locator('.sc-iJuUWI .sc-bYEvPH').innerText()
+
+    await pagePlayer.waitForSelector('.sc-kiYtDG')
+    await checkPagePlayerIsRunning(context)
 
     if (currentTimerMusic === timerMusicBegin){
         throw new Error ("Music doesn't start")
@@ -79,6 +112,7 @@ test('Start a French-speaking song', async ({ page, context }) => {
 
 test('Start a song with a accentuated characters in its title', async ({ page, context }) => {
 
+    const pagePlayer = context.pages()[1]
     await playSong(page,'Images' ,'Les démons de minuit')
 
     const timerMusicBegin = await page.locator('.sc-iJuUWI .sc-bYEvPH').innerText()
@@ -86,6 +120,8 @@ test('Start a song with a accentuated characters in its title', async ({ page, c
 
     const currentTimerMusic = await page.locator('.sc-iJuUWI .sc-bYEvPH').innerText()
 
+    await pagePlayer.waitForSelector('.sc-kiYtDG')
+    await checkPagePlayerIsRunning(context)
 
     if (currentTimerMusic === timerMusicBegin){
         throw new Error ("Music doesn't start")
@@ -94,11 +130,15 @@ test('Start a song with a accentuated characters in its title', async ({ page, c
 
 test('Start a MP4 song', async ({ page, context }) => {
 
+    const pagePlayer = context.pages()[1]
     await playSong(page, 'BTS', 'Dynamite')
 
     const timerMusicBegin = await page.locator('.sc-iJuUWI .sc-bYEvPH').innerText()
     await page.waitForTimeout(10000)
     const currentTimerMusic = await page.locator('.sc-iJuUWI .sc-bYEvPH').innerText()
+
+    await pagePlayer.waitForSelector('.sc-kiYtDG')
+    await checkPagePlayerIsRunning(context)
 
     if (currentTimerMusic === timerMusicBegin){
         throw new Error ("Music doesn't start")
@@ -128,6 +168,7 @@ test('Playlist', async ({ page, context }) => {
 
 test('Play/Pause button', async ({ page, context }) => {
 
+    const pagePlayer = context.pages()[1]
     await playSong(page, 'BTS', 'Dynamite')
 
     const timerMusicBegin = await page.locator('.sc-iJuUWI .sc-bYEvPH').innerText()
@@ -137,6 +178,9 @@ test('Play/Pause button', async ({ page, context }) => {
     await page.waitForTimeout(4000)
     const currentTimerMusic = await page.locator('.sc-iJuUWI .sc-bYEvPH').innerText()
     await page.waitForTimeout(4000)
+
+    await pagePlayer.waitForSelector('.sc-kiYtDG')
+    await checkPagePlayerIsRunning(context)
 
     if (currentTimerMusic === timerMusicBegin){
          throw new Error ("Music doesn't start")
@@ -374,6 +418,7 @@ test('Rail test slide', async ({ page, context }) => {
 
 test('Slide to the end of a song and check if the next song start correctly', async ({ page, context }) => {
 
+    const pagePlayer = context.pages()[1]
     await playlistSong(page, 'BTS')
     await page.locator('.sc-ehSCib .MuiListItem-container div[role="button"]:has-text("Butter")').click();
     await page.locator('text=ButterBTSPlay nextDelete >> button >> nth=1').click();
@@ -400,12 +445,15 @@ test('Slide to the end of a song and check if the next song start correctly', as
     await page.waitForTimeout(10000)
     const currentSong = await page.locator('.sc-ezrdKe').innerText()
 
+    await pagePlayer.waitForSelector('.sc-kiYtDG')
+    await checkPagePlayerIsRunning(context)
+
     if(currentSong !==Playlist[1]){
         throw new Error ("Slider doesn't work")
     }
 });
 
-test.beforeEach(async ({ page }) => {
+test.beforeEach(async ({page, context}) => {
 
     // load homepage before each test
     await page.goto(BASE_URL);
@@ -427,6 +475,7 @@ test.beforeEach(async ({ page }) => {
     await page.waitForTimeout(1000)
     await page.locator('text=Unlimited session').click();
     await page.waitForTimeout(1000)
+    
 });
 
 test.afterEach(async ({ page }) =>{
