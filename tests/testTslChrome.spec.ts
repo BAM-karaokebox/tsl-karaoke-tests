@@ -1,6 +1,7 @@
 import { test, Page, BrowserContext } from '@playwright/test';
 
-const BASE_URL = 'https://www.tslkaraoke.com/?options=dtv&?utm_source=bkb-website-tests&utm_medium=qa-bot&utm_campaign=monitoring';
+const BASE_URL =
+  'https://www.tslkaraoke.com/?options=dtv&?utm_source=bkb-website-tests&utm_medium=qa-bot&utm_campaign=monitoring';
 
 let vocalGuide: boolean;
 
@@ -63,7 +64,6 @@ const checkPagePlayerIsRunning = async (context: BrowserContext) => {
 };
 
 test('Research function', async ({ page }) => {
-  
   //search a song
   await page.fill('[type="text"]', 'PNL');
   await page.keyboard.press('Enter');
