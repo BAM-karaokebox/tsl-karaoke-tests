@@ -17,10 +17,8 @@ jobs:
         run: npm ci
       - name: Install Playwright
         run: npx playwright install --with-deps
-      - name: Run Playwright tests Tsl chrome
-        run: npx playwright test testTslChrome.spec.ts --projet=chrome
-      - name: Run Playwright tests Tsl webkit
-        run: npx playwright test testTslWebkit.spec.ts --projet=webkit
+      - name: Run Playwright tests
+        run: npx playwright test
         env:
           AUTH_USER_BACK: ${{ secrets.AUTH_USER_BACK }}
           AUTH_PASS_BACK: ${{ secrets.AUTH_PASS_BACK }}

@@ -18,7 +18,6 @@ const playSong = async (page: Page, search: string, songName: string, context: B
       let body = await reponse.body();
       body = JSON.parse(body.toString()) as Buffer;
       vocalGuide = body.isVocalGuideAvailable as boolean;
-      console.log(vocalGuide);
     }
   });
 
