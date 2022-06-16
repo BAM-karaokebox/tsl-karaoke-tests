@@ -34,7 +34,7 @@ const config: PlaywrightTestConfig = {
     actionTimeout: 20000,
 
     /* Collect trace when a test fail. Check at the end of the report */
-    trace: 'on',
+    trace: 'retain-on-failure',
   },
 
   /* Configure projects for major browsers */
