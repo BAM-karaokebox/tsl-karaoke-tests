@@ -12,6 +12,7 @@ const playSong = async (page: Page, search: string, songName: string, context: B
   await page.locator(`div[role="button"]:has-text("${songName}")`).click();
   await page.locator(`text=${songName}${search}Play nextAdd to waiting list >> button >> nth=1`).click();
 
+  //Allow to interact with the second page
   const pagePlayer = context.pages()[1];
   pagePlayer.on('response', async (reponse) => {
     if (reponse.request().url() === 'https://backend.api.bam-karaokeonline.com/video-metadata?scope=b2b') {
@@ -48,9 +49,9 @@ const checkPagePlayerIsRunning = async (context: BrowserContext) => {
 
   const word = await pagePlayer.evaluate(() => {
     const word = [];
-    const numbrerWord = document.querySelectorAll('.word').length;
+    const numberWord = document.querySelectorAll('.word').length;
     const wordSong = document.querySelectorAll('.word');
-    for (let i = 0; i < numbrerWord; i++) {
+    for (let i = 0; i < numberWord; i++) {
       word.push(wordSong[i].textContent);
     }
     return word;
@@ -62,8 +63,8 @@ const checkPagePlayerIsRunning = async (context: BrowserContext) => {
 };
 
 test('Research function', async ({ page }) => {
+  
   //search a song
-
   await page.fill('[type="text"]', 'PNL');
   await page.keyboard.press('Enter');
   await page.waitForTimeout(2000);
