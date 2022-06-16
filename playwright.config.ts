@@ -14,7 +14,7 @@ const config: PlaywrightTestConfig = {
     /**
      * Maximum time expect() should wait for the condition to be met.
      */
-    timeout: 15000,
+    timeout: 20000,
   },
   headless: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -23,7 +23,7 @@ const config: PlaywrightTestConfig = {
    * We allow one retry to make the tests less prone to time-out issues,
    * but no more (to avoid aggravating ongoing performance crunches).
    */
-  retries: 1,
+  retries: 0,
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. */
@@ -31,10 +31,10 @@ const config: PlaywrightTestConfig = {
   /* Shared settings for all the projects below. */
   use: {
     /* Maximum time each action such as `click()` can take. */
-    actionTimeout: 15000,
+    actionTimeout: 20000,
 
     /* Collect trace when a test fail. Check at the end of the report */
-    trace: 'retain-on-failure',
+    trace: 'on',
   },
 
   /* Configure projects for major browsers */
@@ -45,6 +45,10 @@ const config: PlaywrightTestConfig = {
         channel: 'chrome',
         ...devices['Desktop Chrome'],
       },
+    },
+    {
+      name: 'webkit',
+      use: { ...devices['Desktop Safari'] },
     },
   ],
 };

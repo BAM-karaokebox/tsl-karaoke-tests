@@ -2,13 +2,26 @@ import { test, Page, BrowserContext } from '@playwright/test';
 
 const BASE_URL = 'https://www.tslkaraoke.com/?options=dtv';
 
-const playSong = async (page: Page, search: string, songName: string) => {
+let vocalGuide: boolean;
+
+const playSong = async (page: Page, search: string, songName: string, context: BrowserContext) => {
   await page.fill('[type="text"]', `${search}`);
   await page.keyboard.press('Enter');
 
   //search a song and launch it
   await page.locator(`div[role="button"]:has-text("${songName}")`).click();
   await page.locator(`text=${songName}${search}Play nextAdd to waiting list >> button >> nth=1`).click();
+
+  const pagePlayer = context.pages()[1];
+  pagePlayer.on('response', async (reponse) => {
+    if (reponse.request().url() === 'https://backend.api.bam-karaokeonline.com/video-metadata?scope=b2b') {
+      let body = await reponse.body();
+      body = JSON.parse(body.toString()) as Buffer;
+      vocalGuide = body.isVocalGuideAvailable as boolean;
+      console.log(vocalGuide);
+    }
+  });
+
   await page.locator('[aria-label="play"]').click();
   await page.waitForSelector('.sc-iJuUWI .sc-bYEvPH');
 };
@@ -43,7 +56,6 @@ const checkPagePlayerIsRunning = async (context: BrowserContext) => {
     }
     return word;
   });
-  console.log(word);
 
   if (word.length === 0) {
     throw new Error('Player is not running');
@@ -52,10 +64,12 @@ const checkPagePlayerIsRunning = async (context: BrowserContext) => {
 
 test('Research function', async ({ page }) => {
   //search a song
+
   await page.fill('[type="text"]', 'PNL');
   await page.keyboard.press('Enter');
   await page.waitForTimeout(2000);
-  //count the number of elemetn wich containt this classes
+
+  //count the number of element wich containt this classes
   const song = page.locator('.MuiListItem-container');
   const numberSong = await song.count();
   if (numberSong === 0) {
@@ -65,13 +79,8 @@ test('Research function', async ({ page }) => {
 
 test('Start an english speaking song', async ({ page, context }) => {
   const pagePlayer = context.pages()[1];
-  console.log(pagePlayer.url());
 
-  await page.locator('img[alt="Bouge\\ ton\\ boule"]').click();
-  await page.locator('div[role="button"]:has-text("Upside DownDiana Ross")').click();
-  await page.locator('text=Upside DownDiana RossPlay nextAdd to waiting list >> button >> nth=1').click();
-  await page.locator('[aria-label="play"]').click();
-  await page.waitForTimeout(5000);
+  await playSong(page, 'Diana Ross', 'Upside Down', context);
 
   //wait the timer to appear and read it
   await page.waitForSelector('.sc-iJuUWI .sc-bYEvPH');
@@ -89,7 +98,7 @@ test('Start an english speaking song', async ({ page, context }) => {
 
 test('Start a French-speaking song', async ({ page, context }) => {
   const pagePlayer = context.pages()[1];
-  await playSong(page, 'PNL', 'Au dd');
+  await playSong(page, 'PNL', 'Au dd', context);
 
   const timerMusicBegin = await page.locator('.sc-iJuUWI .sc-bYEvPH').innerText();
   await page.waitForTimeout(10000);
@@ -106,7 +115,7 @@ test('Start a French-speaking song', async ({ page, context }) => {
 
 test('Start a song with a accentuated characters in its title', async ({ page, context }) => {
   const pagePlayer = context.pages()[1];
-  await playSong(page, 'Images', 'Les démons de minuit');
+  await playSong(page, 'Images', 'Les démons de minuit', context);
 
   const timerMusicBegin = await page.locator('.sc-iJuUWI .sc-bYEvPH').innerText();
   await page.waitForTimeout(10000);
@@ -123,7 +132,7 @@ test('Start a song with a accentuated characters in its title', async ({ page, c
 
 test('Start a MP4 song', async ({ page, context }) => {
   const pagePlayer = context.pages()[1];
-  await playSong(page, 'BTS', 'Dynamite');
+  await playSong(page, 'BTS', 'Butter', context);
 
   const timerMusicBegin = await page.locator('.sc-iJuUWI .sc-bYEvPH').innerText();
   await page.waitForTimeout(10000);
@@ -159,17 +168,18 @@ test('Playlist', async ({ page }) => {
 
 test('Play/Pause button', async ({ page, context }) => {
   const pagePlayer = context.pages()[1];
-  await playSong(page, 'BTS', 'Dynamite');
+  await playSong(page, 'PNL', 'Au DD', context);
 
   const timerMusicBegin = await page.locator('.sc-iJuUWI .sc-bYEvPH').innerText();
-  await page.waitForTimeout(5000);
+  await page.waitForTimeout(15000);
+  await pagePlayer.waitForSelector('.sc-kiYtDG');
 
   await page.locator('[aria-label="play"]').click();
-  await page.waitForTimeout(4000);
+  await page.waitForTimeout(7000);
   const currentTimerMusic = await page.locator('.sc-iJuUWI .sc-bYEvPH').innerText();
-  await page.waitForTimeout(4000);
+  await page.waitForTimeout(7000);
 
-  await pagePlayer.waitForSelector('.sc-kiYtDG');
+  //await pagePlayer.waitForSelector('.sc-kiYtDG');
   await checkPagePlayerIsRunning(context);
 
   if (currentTimerMusic === timerMusicBegin) {
@@ -183,8 +193,8 @@ test('Play/Pause button', async ({ page, context }) => {
   }
 });
 
-test('Back button', async ({ page }) => {
-  await playSong(page, 'BTS', 'Dynamite');
+test('Back button', async ({page, context}) => {
+  await playSong(page, 'BTS', 'Dynamite', context);
 
   const timerMusicBegin = await page.locator('.sc-iJuUWI .sc-bYEvPH').innerText();
   await page.waitForTimeout(8000);
@@ -212,7 +222,7 @@ test('Next button', async ({ page }) => {
   await page.locator('text=ButterBTSPlay nextDelete >> button >> nth=1').click();
   await page.waitForTimeout(5000);
 
-  //click on the back button
+  //click on the next button
   const timer = await page.locator('.sc-iJuUWI .sc-bYEvPH').innerText();
   await page
     .locator('text=Butter | BTS' + timer + 'Vocal guide >> button >> nth=2')
@@ -236,8 +246,8 @@ test('Next button', async ({ page }) => {
   }
 });
 
-test('Rail test', async ({ page }) => {
-  await playSong(page, 'BTS', 'Dynamite');
+test('Rail test', async ({ page, context }) => {
+  await playSong(page, 'BTS', 'Dynamite', context);
   await page.waitForTimeout(5000);
 
   await page.locator('.MuiSlider-rail').click();
@@ -248,28 +258,28 @@ test('Rail test', async ({ page }) => {
   }
 });
 
-test('Voice guide disable', async ({ page }) => {
-  await playSong(page, 'BTS', 'Dynamite');
+test('Voice guide disable', async ({ page, context }) => {
+  await playSong(page, 'BTS', 'Dynamite', context);
   await page.waitForTimeout(5000);
 
   //class of the voice guide available
-  if (await page.locator('.zJhbY').isVisible()) {
+  if ((await page.locator('.zJhbY').isVisible()) && vocalGuide === false) {
     throw new Error("Voice guide is available but it shouldn't be");
   }
 });
 
-test('Voice guide available', async ({ page }) => {
-  await playSong(page, 'BTS', 'Butter');
+test('Voice guide available', async ({ page, context }) => {
+  await playSong(page, 'BTS', 'Butter', context);
   await page.waitForTimeout(5000);
 
   //class of the voice guide disable
-  if (await page.locator('.cvDhqK').isVisible()) {
+  if ((await page.locator('.cvDhqK').isVisible()) || vocalGuide !== true) {
     throw new Error("Voice guide isn't available but it should be");
   }
 });
 
-test('Voice guide activated', async ({ page }) => {
-  await playSong(page, 'BTS', 'Butter');
+test('Voice guide activated', async ({ page, context }) => {
+  await playSong(page, 'BTS', 'Butter', context);
   await page.waitForTimeout(5000);
 
   await page.locator('.zJhbY').click();
@@ -387,8 +397,8 @@ test('Voice guide activated and i can interact with button', async ({ page }) =>
   }
 });
 
-test('Rail test slide', async ({ page }) => {
-  await playSong(page, 'BTS', 'Dynamite');
+test('Rail test slide', async ({ page, context }) => {
+  await playSong(page, 'BTS', 'Dynamite', context);
 
   await page.waitForSelector('[role="slider"]');
   const slider = await page.$('[role="slider"]');
@@ -463,7 +473,7 @@ test.beforeEach(async ({ page }) => {
     await page.locator('text=Validate').click();
     await page.waitForTimeout(1000);
   }
-  await page.waitForTimeout(1000);
+  await page.waitForSelector('text= TYPE');
   page.locator('.sc-hJxCPi akaEU');
   for (let i = 1; i < 7; i++) {
     await page.locator(`button:has-text("${i}")`).click();
@@ -485,4 +495,5 @@ test.afterEach(async ({ page }) => {
   await page.locator('text=Validate').click();
   await page.locator('text=log out').click();
   await page.locator('text=Yes, i confirm').click();
+  await page.waitForSelector('text=2');
 });
