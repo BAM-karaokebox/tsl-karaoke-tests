@@ -1,6 +1,6 @@
 import { test, Page, BrowserContext } from '@playwright/test';
 
-const BASE_URL = 'https://www.tslkaraoke.com/?options=dtv';
+const BASE_URL = 'https://www.tslkaraoke.com/?options=dtv&?utm_source=bkb-website-tests&utm_medium=qa-bot&utm_campaign=monitoring';
 
 let vocalGuide: boolean;
 
@@ -193,7 +193,7 @@ test('Play/Pause button', async ({ page, context }) => {
   }
 });
 
-test('Back button', async ({page, context}) => {
+test('Back button', async ({ page, context }) => {
   await playSong(page, 'BTS', 'Dynamite', context);
 
   const timerMusicBegin = await page.locator('.sc-iJuUWI .sc-bYEvPH').innerText();
