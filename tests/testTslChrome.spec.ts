@@ -7,13 +7,13 @@ let vocalGuide: boolean;
 let format: string;
 
 interface Artist {
-  testName : string;
+  testName: string;
   name: string;
   song: string;
 }
 
 const ARTIST: Artist[] = [
-    /*{
+  /*{
       testName : 'english speaking song',
       name: 'XTS',
       song: 'XTS003#',
@@ -23,11 +23,11 @@ const ARTIST: Artist[] = [
       name: 'XTS',
       song: 'XTS013ñ',
     },*/
-    {
-      testName : 'MP4 song',
-      name: 'XTS',
-      song: 'XTS018=',
-    },
+  {
+    testName: 'MP4 song',
+    name: 'XTS',
+    song: 'XTS018=',
+  },
 ];
 
 const playSong = async (page: Page, artistName: string, songName: string, context: BrowserContext) => {
@@ -50,9 +50,8 @@ const playSong = async (page: Page, artistName: string, songName: string, contex
   });
 
   await page.locator('[aria-label="play"]').click();
-  if (format === 'MP3_KBP'){
+  if (format === 'MP3_KBP') {
     await page.waitForSelector('.sc-iJuUWI .sc-bYEvPH');
-
   }
 };
 
@@ -77,7 +76,7 @@ const playlistSong = async (page: Page, artistName: string) => {
 const checkPagePlayerIsRunning = async (context: BrowserContext) => {
   const pagePlayer: Page = context.pages()[1];
 
-  if (format === 'MP3_KBP'){
+  if (format === 'MP3_KBP') {
     const word = await pagePlayer.evaluate(() => {
       const word = [];
       const numberWord = document.querySelectorAll('.word').length;
@@ -93,15 +92,18 @@ const checkPagePlayerIsRunning = async (context: BrowserContext) => {
     }
   }
 
-  if (format === 'MP4'){
-    await pagePlayer.screenshot({ path : 'tests/testTslChrome.spec.ts-snapshots/screenshot-chrome-darwin.png',fullPage:true});
+  if (format === 'MP4') {
+    await pagePlayer.screenshot({
+      path: 'tests/testTslChrome.spec.ts-snapshots/screenshot-chrome-darwin.png',
+      fullPage: true,
+    });
     await pagePlayer.waitForTimeout(3000);
     //expect(await pagePlayer.screenshot()).not.toMatchSnapshot('screenshot.png');
     expect(await pagePlayer.screenshot()).not.toMatchSnapshot('screenshot.png');
   }
 };
 
-const testDifferentSong = async (page: Page, artist:Artist ,context: BrowserContext ) => {
+const testDifferentSong = async (page: Page, artist: Artist, context: BrowserContext) => {
   const pagePlayer = context.pages()[1];
 
   await playSong(page, `${artist.name}`, `${artist.song}`, context);
@@ -112,9 +114,9 @@ const testDifferentSong = async (page: Page, artist:Artist ,context: BrowserCont
   await page.waitForTimeout(10000);
   const currentTimerMusic = await page.locator('.sc-iJuUWI .sc-bYEvPH').innerText();
 
-  if (format === 'MP3_KBP'){
+  if (format === 'MP3_KBP') {
     await pagePlayer.waitForSelector('.sc-kiYtDG');
-  } 
+  }
   await checkPagePlayerIsRunning(context);
 
   if (currentTimerMusic === timerMusicBegin) {
@@ -146,8 +148,8 @@ test('Search function', async ({ page }) => {
   }
 });*/
 
-ARTIST.forEach(artist => {
-    test(`Artist: ${artist.testName}`, async ({ page, context }) => testDifferentSong(page, artist ,context));
+ARTIST.forEach((artist) => {
+  test(`Artist: ${artist.testName}`, async ({ page, context }) => testDifferentSong(page, artist, context));
 });
 /*
 test('Playlist', async ({ page }) => {
