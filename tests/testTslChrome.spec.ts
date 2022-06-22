@@ -1,17 +1,42 @@
-import { test, Page, BrowserContext } from '@playwright/test';
+import { test, Page, BrowserContext, expect } from '@playwright/test';
 
 const BASE_URL =
-  'https://www.tslkaraoke.com/?options=dtv&?utm_source=bkb-website-tests&utm_medium=qa-bot&utm_campaign=monitoring';
+  'https://www.tslkaraoke.com/?options=dtv&utm_source=bkb-website-tests&utm_medium=qa-bot&utm_campaign=monitoring';
 
 let vocalGuide: boolean;
+let format: string;
 
-const playSong = async (page: Page, search: string, songName: string, context: BrowserContext) => {
-  await page.fill('[type="text"]', `${search}`);
+interface Artist {
+  testName : string;
+  name: string;
+  song: string;
+}
+
+const ARTIST: Artist[] = [
+    /*{
+      testName : 'english speaking song',
+      name: 'XTS',
+      song: 'XTS003#',
+    },
+    {
+      testName : 'song with a accentuated characters in its title',
+      name: 'XTS',
+      song: 'XTS013ñ',
+    },*/
+    {
+      testName : 'MP4 song',
+      name: 'XTS',
+      song: 'XTS018=',
+    },
+];
+
+const playSong = async (page: Page, artistName: string, songName: string, context: BrowserContext) => {
+  await page.fill('[type="text"]', `${artistName}`);
   await page.keyboard.press('Enter');
 
-  //search a song and launch it
-  await page.locator(`div[role="button"]:has-text("${songName}")`).click();
-  await page.locator(`text=${songName}${search}Play nextAdd to waiting list >> button >> nth=1`).click();
+  //artistName a song and launch it
+  await page.locator(`div[role="button"]:has-text('${songName}')`).click();
+  await page.locator(`text=${songName}${artistName}Play nextAdd to waiting list >> button >> nth=1`).click();
 
   //Allow to interact with the second page
   const pagePlayer = context.pages()[1];
@@ -20,17 +45,21 @@ const playSong = async (page: Page, search: string, songName: string, context: B
       let body = await reponse.body();
       body = JSON.parse(body.toString()) as Buffer;
       vocalGuide = body.isVocalGuideAvailable as boolean;
+      format = body.playerType as string;
     }
   });
 
   await page.locator('[aria-label="play"]').click();
-  await page.waitForSelector('.sc-iJuUWI .sc-bYEvPH');
+  if (format === 'MP3_KBP'){
+    await page.waitForSelector('.sc-iJuUWI .sc-bYEvPH');
+
+  }
 };
 
-const Playlist = ['Butter', 'Permission To Dance', 'Dynamite'];
-const playlistSong = async (page: Page, search: string) => {
+const Playlist = ['XTS017"', 'XTS017"', 'XTS003#'];
+const playlistSong = async (page: Page, artistName: string) => {
   //Search different song and create a playlist
-  await page.fill('[type="text"]', `${search}`);
+  await page.fill('[type="text"]', `${artistName}`);
   await page.keyboard.press('Enter');
 
   await page.locator(`div[role="button"]:has-text("${Playlist[0]}")`).click();
@@ -48,39 +77,34 @@ const playlistSong = async (page: Page, search: string) => {
 const checkPagePlayerIsRunning = async (context: BrowserContext) => {
   const pagePlayer: Page = context.pages()[1];
 
-  const word = await pagePlayer.evaluate(() => {
-    const word = [];
-    const numberWord = document.querySelectorAll('.word').length;
-    const wordSong = document.querySelectorAll('.word');
-    for (let i = 0; i < numberWord; i++) {
-      word.push(wordSong[i].textContent);
-    }
-    return word;
-  });
+  if (format === 'MP3_KBP'){
+    const word = await pagePlayer.evaluate(() => {
+      const word = [];
+      const numberWord = document.querySelectorAll('.word').length;
+      const wordSong = document.querySelectorAll('.word');
+      for (let i = 0; i < numberWord; i++) {
+        word.push(wordSong[i].textContent);
+      }
+      return word;
+    });
 
-  if (word.length === 0) {
-    throw new Error('Player is not running');
+    if (word.length === 0) {
+      throw new Error('Player is not running');
+    }
+  }
+
+  if (format === 'MP4'){
+    await pagePlayer.screenshot({ path : 'tests/testTslChrome.spec.ts-snapshots/screenshot-chrome-darwin.png',fullPage:true});
+    await pagePlayer.waitForTimeout(3000);
+    //expect(await pagePlayer.screenshot()).not.toMatchSnapshot('screenshot.png');
+    expect(await pagePlayer.screenshot()).not.toMatchSnapshot('screenshot.png');
   }
 };
 
-test('Research function', async ({ page }) => {
-  //search a song
-  await page.fill('[type="text"]', 'PNL');
-  await page.keyboard.press('Enter');
-  await page.waitForTimeout(2000);
-
-  //count the number of element wich containt this classes
-  const song = page.locator('.MuiListItem-container');
-  const numberSong = await song.count();
-  if (numberSong === 0) {
-    throw new Error('Search failed, no song was found');
-  }
-});
-
-test('Start an english speaking song', async ({ page, context }) => {
+const testDifferentSong = async (page: Page, artist:Artist ,context: BrowserContext ) => {
   const pagePlayer = context.pages()[1];
 
-  await playSong(page, 'Diana Ross', 'Upside Down', context);
+  await playSong(page, `${artist.name}`, `${artist.song}`, context);
 
   //wait the timer to appear and read it
   await page.waitForSelector('.sc-iJuUWI .sc-bYEvPH');
@@ -88,66 +112,46 @@ test('Start an english speaking song', async ({ page, context }) => {
   await page.waitForTimeout(10000);
   const currentTimerMusic = await page.locator('.sc-iJuUWI .sc-bYEvPH').innerText();
 
-  await pagePlayer.waitForSelector('.sc-kiYtDG');
+  if (format === 'MP3_KBP'){
+    await pagePlayer.waitForSelector('.sc-kiYtDG');
+  } 
   await checkPagePlayerIsRunning(context);
 
   if (currentTimerMusic === timerMusicBegin) {
     throw new Error("Music doesn't start");
   }
-});
+};
+/*
+test('Search function', async ({ page }) => {
+  //Search a song
+  await page.fill('[type="text"]', 'XTS');
+  await page.keyboard.press('Enter');
+  await page.waitForTimeout(2000);
 
-test('Start a French-speaking song', async ({ page, context }) => {
+  //count the number of element wich containt this classes
+  const song = page.locator('.MuiListItem-container');
+  const numberSong = await song.count();
+  if (numberSong === 0) {
+    throw new Error('artistName failed, no song was found');
+  }
+});*/
+
+/*test('My video doesn’t load and I see a message', async ({ page, context }) => {
   const pagePlayer = context.pages()[1];
-  await playSong(page, 'PNL', 'Au dd', context);
 
-  const timerMusicBegin = await page.locator('.sc-iJuUWI .sc-bYEvPH').innerText();
-  await page.waitForTimeout(10000);
-
-  const currentTimerMusic = await page.locator('.sc-iJuUWI .sc-bYEvPH').innerText();
-
-  await pagePlayer.waitForSelector('.sc-kiYtDG');
-  await checkPagePlayerIsRunning(context);
-
-  if (currentTimerMusic === timerMusicBegin) {
-    throw new Error("Music doesn't start");
+  await playSong(page, 'XTS','XTS017"',context);
+  await pagePlayer.waitForTimeout(5000)
+  if (await pagePlayer.isHidden('.sc-dWdcrH', {strict:true})){
+    throw new Error ("Error message doesn't appear in the page player")
   }
+});*/
+
+ARTIST.forEach(artist => {
+    test(`Artist: ${artist.testName}`, async ({ page, context }) => testDifferentSong(page, artist ,context));
 });
-
-test('Start a song with a accentuated characters in its title', async ({ page, context }) => {
-  const pagePlayer = context.pages()[1];
-  await playSong(page, 'Images', 'Les démons de minuit', context);
-
-  const timerMusicBegin = await page.locator('.sc-iJuUWI .sc-bYEvPH').innerText();
-  await page.waitForTimeout(10000);
-
-  const currentTimerMusic = await page.locator('.sc-iJuUWI .sc-bYEvPH').innerText();
-
-  await pagePlayer.waitForSelector('.sc-kiYtDG');
-  await checkPagePlayerIsRunning(context);
-
-  if (currentTimerMusic === timerMusicBegin) {
-    throw new Error("Music doesn't start");
-  }
-});
-
-test('Start a MP4 song', async ({ page, context }) => {
-  const pagePlayer = context.pages()[1];
-  await playSong(page, 'BTS', 'Butter', context);
-
-  const timerMusicBegin = await page.locator('.sc-iJuUWI .sc-bYEvPH').innerText();
-  await page.waitForTimeout(10000);
-  const currentTimerMusic = await page.locator('.sc-iJuUWI .sc-bYEvPH').innerText();
-
-  await pagePlayer.waitForSelector('.sc-kiYtDG');
-  await checkPagePlayerIsRunning(context);
-
-  if (currentTimerMusic === timerMusicBegin) {
-    throw new Error("Music doesn't start");
-  }
-});
-
+/*
 test('Playlist', async ({ page }) => {
-  await playlistSong(page, 'BTS');
+  await playlistSong(page, 'XTS');
 
   const playlistTest = await page.evaluate(() => {
     const playlist = [];
@@ -168,7 +172,7 @@ test('Playlist', async ({ page }) => {
 
 test('Play/Pause button', async ({ page, context }) => {
   const pagePlayer = context.pages()[1];
-  await playSong(page, 'PNL', 'Au DD', context);
+  await playSong(page, 'XTS', 'XTS003#', context);
 
   const timerMusicBegin = await page.locator('.sc-iJuUWI .sc-bYEvPH').innerText();
   await page.waitForTimeout(15000);
@@ -194,7 +198,7 @@ test('Play/Pause button', async ({ page, context }) => {
 });
 
 test('Back button', async ({ page, context }) => {
-  await playSong(page, 'BTS', 'Dynamite', context);
+  await playSong(page, 'XTS', 'XTS003#', context);
 
   const timerMusicBegin = await page.locator('.sc-iJuUWI .sc-bYEvPH').innerText();
   await page.waitForTimeout(8000);
@@ -215,7 +219,7 @@ test('Back button', async ({ page, context }) => {
 });
 
 test('Next button', async ({ page }) => {
-  await playlistSong(page, 'BTS');
+  await playlistSong(page, 'XTS');
 
   //launch the first song of the playlist
   await page.locator('.sc-ehSCib .MuiListItem-container div[role="button"]:has-text("Butter")').click();
@@ -244,22 +248,22 @@ test('Next button', async ({ page }) => {
   if (currentSong !== Playlist[1] && playlistTest.length !== 1) {
     throw new Error("Next button doesn't work");
   }
-});
-
+});*/
+/*
 test('Rail test', async ({ page, context }) => {
-  await playSong(page, 'BTS', 'Dynamite', context);
+  await playSong(page, 'XTS', 'XTS003#', context);
   await page.waitForTimeout(5000);
 
   await page.locator('.MuiSlider-rail').click();
   const timer = JSON.stringify(await page.locator('.sc-iJuUWI .sc-bYEvPH').innerText());
 
-  if (timer !== '"01:43"') {
+  if (timer !== '"00:26"') {
     throw new Error("Rail doesn't work");
   }
-});
-
+});*/
+/*
 test('Voice guide disable', async ({ page, context }) => {
-  await playSong(page, 'BTS', 'Dynamite', context);
+  await playSong(page, 'XTS', 'XTS003#', context);
   await page.waitForTimeout(5000);
 
   //class of the voice guide available
@@ -269,39 +273,39 @@ test('Voice guide disable', async ({ page, context }) => {
 });
 
 test('Voice guide available', async ({ page, context }) => {
-  await playSong(page, 'BTS', 'Butter', context);
+  await playSong(page, 'XTS', 'XTS003#', context);
   await page.waitForTimeout(5000);
 
   //class of the voice guide disable
-  if ((await page.locator('.cvDhqK').isVisible()) || vocalGuide !== true) {
+  if ((await page.locator('.cvDhqK').isVisible()) && vocalGuide === true) {
     throw new Error("Voice guide isn't available but it should be");
   }
 });
 
 test('Voice guide activated', async ({ page, context }) => {
-  await playSong(page, 'BTS', 'Butter', context);
+  await playSong(page, 'XTS', 'XTS0017"', context);
   await page.waitForTimeout(5000);
 
   await page.locator('.zJhbY').click();
   await page.waitForTimeout(10000);
 
-  if (await page.locator('.cvDhqK, .zJhbY').isVisible()) {
+  if (await page.locator('.cvDhqK, .zJhbY').isVisible() && vocalGuide === true) {
     throw new Error('Voice guide should be activated but it is not');
   }
 });
 
 test('Check if voice guide still activated after a song', async ({ page }) => {
-  await playlistSong(page, 'BTS');
+  await playlistSong(page, 'XTS');
 
-  await page.locator('.sc-ehSCib .MuiListItem-container div[role="button"]:has-text("Butter")').click();
-  await page.locator('text=ButterBTSPlay nextDelete >> button >> nth=1').click();
+  await page.locator('.sc-ehSCib .MuiListItem-container div[role="button"]:has-text("XTS00173")').click();
+  await page.locator('text=XTS0017"XTSPlay nextDelete >> button >> nth=1').click();
 
   await page.locator('.zJhbY').click();
   await page.waitForTimeout(1000);
 
-  const timerNextButter = await page.locator('.sc-iJuUWI .sc-bYEvPH').innerText();
+  const timerNextXTS0017 = await page.locator('.sc-iJuUWI .sc-bYEvPH').innerText();
   await page
-    .locator('text=Butter | BTS' + timerNextButter + 'Vocal guide >> button >> nth=2')
+    .locator('text=Butter | BTS' + timerNextXTS0017 + 'Vocal guide >> button >> nth=2')
     .first()
     .click();
   await page.waitForTimeout(6000);
@@ -314,9 +318,9 @@ test('Check if voice guide still activated after a song', async ({ page }) => {
   await page.locator('.zJhbY').click();
   await page.waitForTimeout(1000);
 
-  const timerNextPermission = await page.locator('.sc-iJuUWI .sc-bYEvPH').innerText();
+  const timerNextXTS = await page.locator('.sc-iJuUWI .sc-bYEvPH').innerText();
   await page
-    .locator('text=Permission To Dance | BTS' + timerNextPermission + 'Vocal guide >> button >> nth=2')
+    .locator('text=Permission To Dance | BTS' + timerNextXTS + 'Vocal guide >> button >> nth=2')
     .first()
     .click();
   await page.waitForTimeout(3000);
@@ -327,10 +331,10 @@ test('Check if voice guide still activated after a song', async ({ page }) => {
 });
 
 test('Voice guide activated and i can interact with button', async ({ page }) => {
-  await playlistSong(page, 'BTS');
+  await playlistSong(page, 'XTS');
 
-  await page.locator('.sc-ehSCib .MuiListItem-container div[role="button"]:has-text("Butter")').click();
-  await page.locator('text=ButterBTSPlay nextDelete >> button >> nth=1').click();
+  await page.locator('.sc-ehSCib .MuiListItem-container div[role="button"]:has-text("XTS0017"")').click();
+  await page.locator('text=XTS0017"XTSPlay nextDelete >> button >> nth=1').click();
 
   await page.waitForTimeout(4000);
   const timerMusicBegin = await page.locator('.sc-iJuUWI .sc-bYEvPH').innerText();
@@ -398,7 +402,7 @@ test('Voice guide activated and i can interact with button', async ({ page }) =>
 });
 
 test('Rail test slide', async ({ page, context }) => {
-  await playSong(page, 'BTS', 'Dynamite', context);
+  await playSong(page, 'XTS', 'XTS003#', context);
 
   await page.waitForSelector('[role="slider"]');
   const slider = await page.$('[role="slider"]');
@@ -427,9 +431,9 @@ test('Rail test slide', async ({ page, context }) => {
 
 test('Slide to the end of a song and check if the next song start correctly', async ({ page, context }) => {
   const pagePlayer = context.pages()[1];
-  await playlistSong(page, 'BTS');
-  await page.locator('.sc-ehSCib .MuiListItem-container div[role="button"]:has-text("Butter")').click();
-  await page.locator('text=ButterBTSPlay nextDelete >> button >> nth=1').click();
+  await playlistSong(page, 'XTS');
+  await page.locator('.sc-ehSCib .MuiListItem-container div[role="button"]:has-text("XTS0017"")').click();
+  await page.locator('text=XTS0017"XTSPlay nextDelete >> button >> nth=1').click();
 
   await page.waitForSelector('[role="slider"]');
   const slider = await page.$('[role="slider"]');
@@ -459,7 +463,7 @@ test('Slide to the end of a song and check if the next song start correctly', as
   if (currentSong !== Playlist[1]) {
     throw new Error("Slider doesn't work");
   }
-});
+});*/
 
 test.beforeEach(async ({ page }) => {
   // load homepage before each test
