@@ -34,7 +34,7 @@ const playSong = async (page: Page, artistName: string, songName: string, contex
   await page.fill('[type="text"]', `${artistName}`);
   await page.keyboard.press('Enter');
 
-  //artistName a song and launch it
+  //Search a song and launch it
   await page.locator(`div[role="button"]:has-text('${songName}')`).click();
   await page.locator(`text=${songName}${artistName}Play nextAdd to waiting list >> button >> nth=1`).click();
 
@@ -106,7 +106,7 @@ const testDifferentSong = async (page: Page, artist: Artist, context: BrowserCon
 
   await playSong(page, `${artist.name}`, `${artist.song}`, context);
 
-  //wait the timer to appear and read it
+  //Wait the timer to appear and read it
   await page.waitForSelector('.sc-iJuUWI .sc-bYEvPH');
   const timerMusicBegin = await page.locator('.sc-iJuUWI .sc-bYEvPH').innerText();
   await page.waitForTimeout(10000);
@@ -128,7 +128,7 @@ test('Search function', async ({ page }) => {
   await page.keyboard.press('Enter');
   await page.waitForTimeout(2000);
 
-  //count the number of element wich containt this classes
+  //Count the number of element wich containt this classes
   const song = page.locator('.MuiListItem-container');
   const numberSong = await song.count();
   if (numberSong === 0) {
@@ -183,7 +183,7 @@ test('Play/Pause button', async ({ page, context }) => {
   const currentTimerMusic = await page.locator('.sc-iJuUWI .sc-bYEvPH').innerText();
   await page.waitForTimeout(7000);
 
-  //await pagePlayer.waitForSelector('.sc-kiYtDG');
+  //Await pagePlayer.waitForSelector('.sc-kiYtDG');
   await checkPagePlayerIsRunning(context);
 
   if (currentTimerMusic === timerMusicBegin) {
@@ -203,7 +203,7 @@ test('Back button', async ({ page, context }) => {
   const timerMusicBegin = await page.locator('.sc-iJuUWI .sc-bYEvPH').innerText();
   await page.waitForTimeout(8000);
 
-  //click on the back button
+  //Click on the back button
   await page.locator('[aria-label="play"]').click();
   const timer = await page.locator('.sc-iJuUWI .sc-bYEvPH').innerText();
   await page
@@ -223,12 +223,12 @@ test('Back button', async ({ page, context }) => {
 test('Next button', async ({ page }) => {
   await playlistSong(page, 'XTS');
 
-  //launch the first song of the playlist
+  //Launch the first song of the playlist
   await page.locator('.MuiList-root > div').first().click();
   await page.locator('text=XTS017"XTSPlay nextDelete >> button >> nth=1').click();
   await page.waitForTimeout(5000);
 
-  //click on the next button
+  //Click on the next button
   await page.locator('[aria-label="play"]').click();
   const timer = await page.locator('.sc-iJuUWI .sc-bYEvPH').innerText();
   await page
@@ -280,7 +280,7 @@ test('Voice guide available', async ({ page, context }) => {
   await playSong(page, 'XTS', 'XTS017"', context);
   await page.waitForTimeout(5000);
 
-  //class of the voice guide disable
+  //Class of the voice guide disable
   if ((await page.locator('.cvDhqK').isVisible()) && vocalGuide === true) {
     throw new Error("Voice guide isn't available but it should be");
   }
@@ -316,7 +316,7 @@ test('Check if voice guide still activated after a song', async ({ page }) => {
   await page.locator('[aria-label="play"]').click();
   await page.waitForTimeout(6000);
 
-  //class of the voice guide ON
+  //Class of the voice guide ON
   if (await page.locator('.fpODTi').isVisible()) {
     throw new Error(`Voice guide shouldn't be activated but it is`);
   }
@@ -474,7 +474,7 @@ test('Slide to the end of a song and check if the next song start correctly', as
 });
 
 test.beforeEach(async ({ page }) => {
-  // load homepage before each test
+  //Load homepage before each test
   await page.goto(BASE_URL);
   for (let i = 0; i < 2; i++) {
     await page.locator('text=2').click();

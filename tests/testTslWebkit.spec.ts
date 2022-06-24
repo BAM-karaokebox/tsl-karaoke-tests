@@ -3,19 +3,19 @@ import { test, Page } from '@playwright/test';
 const BASE_URL =
   'https://www.tslkaraoke.com/?options=dtv&utm_source=bkb-website-tests&utm_medium=qa-bot&utm_campaign=monitoring';
 
-const Playlist = ['Butter', 'Permission To Dance', 'Dynamite'];
+const Playlist = ['XTS003#', 'XTS018=', 'XTS017"'];
 const playlistSong = async (page: Page, search: string) => {
   //Search different song and create a playlist
   await page.fill('[type="text"]', `${search}`);
   await page.keyboard.press('Enter');
 
-  await page.locator(`div[role="button"]:has-text("${Playlist[0]}")`).click();
+  await page.locator(`div[role="button"]:has-text('${Playlist[0]}')`).click();
   await page.locator('button:has-text("Add to waiting list")').click();
 
-  await page.locator(`div[role="button"]:has-text("${Playlist[1]}")>> nth=0`).click();
+  await page.locator(`div[role="button"]:has-text('${Playlist[1]}')>> nth=0`).click();
   await page.locator('button:has-text("Add to waiting list")').click();
 
-  await page.locator(`div[role="button"]:has-text("${Playlist[2]}") `).click();
+  await page.locator(`div[role="button"]:has-text('${Playlist[2]}') `).click();
   await page.locator('button:has-text("Add to waiting list")').click();
 
   await page.waitForTimeout(4000);
@@ -23,8 +23,7 @@ const playlistSong = async (page: Page, search: string) => {
 
 test('Research function', async ({ page }) => {
   //search a song
-
-  await page.fill('[type="text"]', 'PNL');
+  await page.fill('[type="text"]', 'XTS');
   await page.keyboard.press('Enter');
   await page.waitForTimeout(2000);
 
@@ -37,7 +36,7 @@ test('Research function', async ({ page }) => {
 });
 
 test('Playlist', async ({ page }) => {
-  await playlistSong(page, 'BTS');
+  await playlistSong(page, 'XTS');
 
   const playlistTest = await page.evaluate(() => {
     const playlist = [];

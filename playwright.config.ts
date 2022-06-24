@@ -25,7 +25,7 @@ const config: PlaywrightTestConfig = {
    */
   retries: 0,
   /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 1 : undefined,
+  workers: process.env.CI ? 1 : 1,
   /* Reporter to use. */
   reporter: 'html',
   /* Shared settings for all the projects below. */
@@ -43,13 +43,61 @@ const config: PlaywrightTestConfig = {
       name: 'chrome',
       use: {
         channel: 'chrome',
-        ...devices['Desktop Chrome'],
+        ...devices['Desktop Chrome HiDPI'],
+      },
+      testMatch: /testTslChrome.spec.ts/,
+    },
+    {
+      name: 'chrome HiDPI',
+      use: {
+        channel: 'chrome',
+        ...devices['Desktop Chrome HiDPI'],
       },
       testMatch: /testTslChrome.spec.ts/,
     },
     {
       name: 'webkit',
       use: { ...devices['Desktop Safari'] },
+      testMatch: /testTslWebkit.spec.ts/,
+    },
+    {
+      name: 'iPad Pro 11 landscap',
+      use: { ...devices['iPad Pro 11 landscape'] },
+      testMatch: /testTslWebkit.spec.ts/,
+    },
+    {
+      name: 'iPad Pro 11',
+      use: { ...devices['iPad Pro 11'] },
+      testMatch: /testTslWebkit.spec.ts/,
+    },
+    {
+      name: 'iPad (gen 7) landscape',
+      use: { ...devices['iPad (gen 7) landscape'] },
+      testMatch: /testTslWebkit.spec.ts/,
+    },
+    {
+      name: 'iPad (gen 7)',
+      use: { ...devices['iPad (gen 7)'] },
+      testMatch: /testTslWebkit.spec.ts/,
+    },
+    {
+      name: 'iPad (gen 6) landscape',
+      use: { ...devices['iPad (gen 6) landscape'] },
+      testMatch: /testTslWebkit.spec.ts/,
+    },
+    {
+      name: 'iPad (gen 6)',
+      use: { ...devices['iPad (gen 6)'] },
+      testMatch: /testTslWebkit.spec.ts/,
+    },
+    {
+      name: 'iPad Mini landscape',
+      use: { ...devices['iPad Mini landscape'] },
+      testMatch: /testTslWebkit.spec.ts/,
+    },
+    {
+      name: 'iPad Mini',
+      use: { ...devices['iPad Mini'] },
       testMatch: /testTslWebkit.spec.ts/,
     },
   ],
