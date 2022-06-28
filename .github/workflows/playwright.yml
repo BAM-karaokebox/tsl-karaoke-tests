@@ -21,7 +21,7 @@ jobs:
       - name: Install Playwright
         run: npx playwright install --with-deps
       - name: Run Playwright tests
-        run: npx playwright test --headed
+        run: npx playwright test
         env:
           AUTH_USER_BACK: ${{ secrets.AUTH_USER_BACK }}
           AUTH_PASS_BACK: ${{ secrets.AUTH_PASS_BACK }}
