@@ -20,7 +20,7 @@ jobs:
       - name: Install chrome
         run: npx playwright install chrome
       - name: Run Playwright tests
-        run: npx playwright test --headed
+        run: npx playwright test
         env:
           AUTH_USER_BACK: ${{ secrets.AUTH_USER_BACK }}
           AUTH_PASS_BACK: ${{ secrets.AUTH_PASS_BACK }}
