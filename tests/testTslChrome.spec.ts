@@ -3,7 +3,7 @@ import { test, Page, BrowserContext, expect } from '@playwright/test';
 const BASE_URL =
   'https://www.tslkaraoke.com/?options=dtv&utm_source=bkb-website-tests&utm_medium=qa-bot&utm_campaign=monitoring';
 
-let vocalGuide: boolean;
+/*let vocalGuide: boolean;
 let format: string;
 
 interface Artist {
@@ -50,11 +50,14 @@ const playSong = async (page: Page, artistName: string, songName: string, contex
   });
 
   await page.locator('[aria-label="play"]').click();
+  await pagePlayer.locator('#root').dblclick();
+  await pagePlayer.locator('#root').dblclick();
+
 
   if (format === 'MP3_KBP') {
     await page.waitForSelector('.sc-iJuUWI .sc-bYEvPH');
   }
-};
+};*/
 
 const Playlist = ['XTS017"', 'XTS017"', 'XTS003#'];
 const playlistSong = async (page: Page, artistName: string) => {
@@ -135,7 +138,7 @@ test('Search function', async ({ page }) => {
     throw new Error('artistName failed, no song was found');
   }
 });
-
+/*
 test('My video doesn’t load and I see a message', async ({ page, context }) => {
   const pagePlayer = context.pages()[1];
 
@@ -149,7 +152,7 @@ test('My video doesn’t load and I see a message', async ({ page, context }) =>
 ARTIST.forEach((artist) => {
   test(`Artist: ${artist.testName}`, async ({ page, context }) => testDifferentSong(page, artist, context));
 });
-
+*/
 test('Playlist', async ({ page }) => {
   await playlistSong(page, 'XTS');
 
@@ -169,7 +172,7 @@ test('Playlist', async ({ page }) => {
     }
   }
 });
-
+/*
 test('Play/Pause button', async ({ page, context }) => {
   const pagePlayer = context.pages()[1];
   await playSong(page, 'XTS', 'XTS003#', context);
@@ -471,7 +474,7 @@ test('Slide to the end of a song and check if the next song start correctly', as
   if (currentSong !== Playlist[1]) {
     throw new Error("Slider doesn't work");
   }
-});
+});*/
 
 test.beforeEach(async ({ page }) => {
   //Load homepage before each test
