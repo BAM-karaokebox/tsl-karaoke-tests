@@ -1,5 +1,8 @@
 name: TSL Karaoke Tests
 on:
+  push:
+    branches:
+      - TSL-174-test-as-a-user-i-can-use-tsl-on-a-browser
   workflow_dispatch:
   schedule:
     - cron: '0 9 * * *'
@@ -18,7 +21,7 @@ jobs:
       - name: Install Playwright
         run: npx playwright install --with-deps
       - name: Run Playwright tests
-        run: npx playwright test
+        run: npx playwright test --headed
         env:
           AUTH_USER_BACK: ${{ secrets.AUTH_USER_BACK }}
           AUTH_PASS_BACK: ${{ secrets.AUTH_PASS_BACK }}
