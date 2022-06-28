@@ -16,7 +16,6 @@ const config: PlaywrightTestConfig = {
      */
     timeout: 20000,
   },
-  headless: false,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
   /*
@@ -43,7 +42,9 @@ const config: PlaywrightTestConfig = {
       name: 'chrome',
       use: {
         channel: 'chrome',
-        ...devices['Desktop Chrome HiDPI'],
+        ...devices['Desktop Chrome'],
+        headless: false,
+
       },
       testMatch: /testTslChrome.spec.ts/,
     },
