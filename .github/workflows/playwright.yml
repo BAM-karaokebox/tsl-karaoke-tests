@@ -17,7 +17,7 @@ jobs:
         with:
           node-version: '14.x'
       - name: Install Xquartz
-        run: brew install XQuartz
+        run: brew install xquartz --cask
       - name: Install dependencies
         run: npm ci
       - name: Install Playwright
