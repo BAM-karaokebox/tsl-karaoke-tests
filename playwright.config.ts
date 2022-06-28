@@ -43,8 +43,7 @@ const config: PlaywrightTestConfig = {
       use: {
         channel: 'chrome',
         ...devices['Desktop Chrome'],
-        headless: false,
-
+        headless: true,
       },
       testMatch: /testTslChrome.spec.ts/,
     },
