@@ -11,7 +11,7 @@ jobs:
   test:
     timeout-minutes: 120
     runs-on: ubuntu-latest
-    container: mcr.microsoft.com/playwright:v1.23.0-focal
+    #container: mcr.microsoft.com/playwright:v1.23.0-focal
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
@@ -24,7 +24,9 @@ jobs:
       - name: Install chrome
         run: npx playwright install chrome
       - name: Run Playwright tests
-        run: npx playwright test --headed
+        uses: GabrielBB/xvfb-action@v1
+        with:
+          run: npx playwright test --headed
         env:
           AUTH_USER_BACK: ${{ secrets.AUTH_USER_BACK }}
           AUTH_PASS_BACK: ${{ secrets.AUTH_PASS_BACK }}
