@@ -122,20 +122,6 @@ const testDifferentSong = async (page: Page, artist: Artist, context: BrowserCon
   }
 };
 
-test('Search function', async ({ page }) => {
-  //Search a song
-  await page.fill('[type="text"]', 'XTS');
-  await page.keyboard.press('Enter');
-  await page.waitForTimeout(2000);
-
-  //Count the number of element wich containt this classes
-  const song = page.locator('.MuiListItem-container');
-  const numberSong = await song.count();
-  if (numberSong === 0) {
-    throw new Error('artistName failed, no song was found');
-  }
-});
-
 test('My video doesn’t load and I see a message', async ({ page, context }) => {
   const pagePlayer = context.pages()[1];
 
@@ -148,26 +134,6 @@ test('My video doesn’t load and I see a message', async ({ page, context }) =>
 
 ARTIST.forEach((artist) => {
   test(`Artist: ${artist.testName}`, async ({ page, context }) => testDifferentSong(page, artist, context));
-});
-
-test('Playlist', async ({ page }) => {
-  await playlistSong(page, 'XTS');
-
-  const playlistTest = await page.evaluate(() => {
-    const playlist = [];
-    const numberSong = document.querySelectorAll('.sc-ehSCib .MuiListItem-container .MuiTypography-body1').length;
-    const song = document.querySelectorAll('.sc-ehSCib .MuiListItem-container .MuiTypography-body1');
-    for (let i = 0; i < numberSong; i++) {
-      playlist.push(song[i].textContent);
-    }
-    return playlist;
-  });
-
-  for (let i = 0; i < Playlist.length; i++) {
-    if (Playlist[i] !== playlistTest[i]) {
-      throw new Error("Playlist doesn't match");
-    }
-  }
 });
 
 test('Play/Pause button', async ({ page, context }) => {

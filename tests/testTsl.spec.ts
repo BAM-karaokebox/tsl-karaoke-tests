@@ -21,7 +21,7 @@ const playlistSong = async (page: Page, search: string) => {
   await page.waitForTimeout(4000);
 };
 
-test('Research function', async ({ page }) => {
+test('Search function', async ({ page }) => {
   //search a song
   await page.fill('[type="text"]', 'XTS');
   await page.keyboard.press('Enter');
