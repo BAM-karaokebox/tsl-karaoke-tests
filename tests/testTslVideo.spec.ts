@@ -1,4 +1,6 @@
 import { test, Page, BrowserContext, expect } from '@playwright/test';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const BASE_URL =
   'https://www.tslkaraoke.com/?options=dtv&utm_source=bkb-website-tests&utm_medium=qa-bot&utm_campaign=monitoring';
@@ -409,8 +411,11 @@ test('Slide to the end of a song and check if the next song start correctly', as
   await page.locator('.MuiList-root > div').first().click();
   await page.locator('text=XTS017"XTSPlay nextDelete >> button >> nth=1').click();
 
+  await page.locator('.sc-eFubAy').click()
+
+
   await page.waitForSelector('[role="slider"]');
-  const slider = await page.$('[role="slider"]');
+  const slider = await page.locator('[role="slider"]');
   const targetTimer = '00:00';
   let isCompleted = false;
   if (slider) {
@@ -440,21 +445,24 @@ test('Slide to the end of a song and check if the next song start correctly', as
 });
 
 test.beforeEach(async ({ page }) => {
-  //Load homepage before each test
+  // load homepage before each test
   await page.goto(BASE_URL);
-  for (let i = 0; i < 2; i++) {
-    await page.locator('text=2').click();
-    await page.locator('button:has-text("2")').click({
-      clickCount: 4,
-    });
-    await page.locator('button:has-text("9")').click();
+  for (let i = 0; i < process.env.TSL_ROOM_ID.length; i++) {
+    await page.locator(`button:has-text("${process.env.TSL_ROOM_ID[i]}")`).click();
+  }
     await page.locator('text=Validate').click();
     await page.waitForTimeout(1000);
+
+  for (let i = 0; i < process.env.TSL_ADMIN_PASS.length; i++) {
+    await page.locator(`button:has-text("${process.env.TSL_ADMIN_PASS[i]}")`).click();
   }
+  await page.locator('text=Validate').click();
+  await page.waitForTimeout(1000);  
+
   await page.waitForSelector('text= TYPE');
   page.locator('.sc-hJxCPi akaEU');
-  for (let i = 1; i < 7; i++) {
-    await page.locator(`button:has-text("${i}")`).click();
+  for (let i = 0; i < process.env.TSL_STAFF_PASS.length; i++) {
+    await page.locator(`button:has-text("${process.env.TSL_STAFF_PASS[i]}")`).click();
   }
   await page.locator('text=Validate').click();
   await page.waitForTimeout(1000);
