@@ -22,8 +22,9 @@ jobs:
       - name: Run Playwright tests
         run: npx playwright test testTsl.spec.ts
         env:
-          AUTH_USER_BACK: ${{ secrets.AUTH_USER_BACK }}
-          AUTH_PASS_BACK: ${{ secrets.AUTH_PASS_BACK }}
+          TSL_ADMIN_PASS: ${{ secrets.TSL_ADMIN_PASS }}
+          TSL_ROOM_ID: ${{ secrets.TSL_ROOM_ID }}
+          TSL_STAFF_PASS: ${{ secrets.TSL_STAFF_PASS }}
       - uses: actions/upload-artifact@v2
         if: always()
         with:
