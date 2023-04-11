@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const BASE_URL =
-  'https://www.tslkaraoke.com/?options=dtv&utm_source=bkb-website-tests&utm_medium=qa-bot&utm_campaign=monitoring';
+  'https://www.tslkaraoke.com/?options=dtv&utm_source=bkb-website-tests&utm_medium=qa-bot&utm_campaign=monitoring&traffic_type=monitoring';
 
 const Playlist = ['XTS003#', 'XTS018=', 'XTS017"'];
 const playlistSong = async (page: Page, search: string) => {
